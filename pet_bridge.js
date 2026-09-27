@@ -6,7 +6,6 @@
         const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
         const TEST_REASON = "웹 테스트 모드 · 실제 걸음과 실외 판별은 측정하지 않아요.";
         let photo = null, photoGeneration = 0, camera = null, cameraGeneration = 0, latestFrame = "", walking = false;
-        let model = null, modelGeneration = 0;
         const emit = event => events.push(event);
         const cameraStatus = (state, message) => emit({ type: "walk_camera_status", state, message });
         const walkStatus = (active, reason = TEST_REASON) => emit({ type: "walk_status", data: {
@@ -224,40 +223,6 @@
             cameraStatus("checking", "브라우저 창의 카메라 켜기 버튼을 눌러 주세요.");
             session.start.focus();
         }
-        function endModel(session, event) {
-            if (model !== session) return;
-            model = null;
-            if (session.reader && session.reader.readyState === 1) session.reader.abort();
-            session.modal.remove();
-            if (event) emit({...event, request_id: session.id});
-        }
-        function chooseModel() {
-            if (model) endModel(model);
-            const session = {id: ++modelGeneration, reader: null};
-            session.modal = dialog('3D 모델 선택', 'PC에서 생성한 pet.glb 파일을 선택해 주세요. 파일은 이 브라우저에만 저장돼요. 최대 24MB.', () => endModel(session, {type:'model_cancelled'}));
-            const input = document.createElement('input');
-            input.type = 'file'; input.accept = '.glb,model/gltf-binary'; input.style.display = 'none';
-            session.modal.panel.appendChild(input);
-            const choose = button('GLB 파일 선택', 'model-choose', () => input.click());
-            session.modal.panel.appendChild(choose);
-            input.addEventListener('cancel', () => endModel(session, {type:'model_cancelled'}));
-            input.addEventListener('change', () => {
-                if (model !== session) return;
-                const file = input.files && input.files[0];
-                if (!file) { endModel(session, {type:'model_cancelled'}); return; }
-                if (!Number.isFinite(file.size) || file.size < 20 || file.size > 24 * 1024 * 1024 || !file.name.toLowerCase().endsWith('.glb')) {
-                    endModel(session, {type:'model_error', message:'24MB 이하의 GLB 파일을 선택해 주세요.'}); return;
-                }
-                choose.disabled = true;
-                session.modal.text.textContent = '3D 모델을 읽고 있어요…';
-                const reader = new env.FileReader(); session.reader = reader;
-                reader.onerror = () => endModel(session, {type:'model_error', message:'3D 파일을 읽지 못했어요.'});
-                reader.onload = () => endModel(session, {type:'model_selected', data:String(reader.result).split(',')[1] || ''});
-                reader.readAsDataURL(file);
-            });
-            model = session;
-            return session.id;
-        }
         function pausePage() {
             if (camera) closeCamera("paused", "화면을 벗어나 카메라를 껐어요. 다시 켜려면 카메라 모드를 눌러 주세요.");
             if (walking) { walking = false; walkStatus(false, "화면을 벗어나 웹 테스트 산책을 일시 정지했어요."); }
@@ -267,8 +232,6 @@
         env.addEventListener("pagehide", pausePage);
 
         return {
-            choose_model: chooseModel,
-            cancel_model() { if (model) endModel(model, {type:'model_cancelled'}); },
             choose_photos: choosePhotos,
             cancel_photos() { if (photo) endPhoto(photo, { type: "photo_cancelled" }); },
             set_walk_camera: setCamera,
