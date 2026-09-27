@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8f7f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>고양고치 · iPhone 웹 테스트</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#e5eadd;color:#34483e;font-family:system-ui,-apple-system,sans-serif}
+#app{position:relative;margin:auto;width:100%;max-width:480px;height:100%;height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:#f8f7f0}
+#canvas{display:block;width:100%;height:100%;touch-action:none;outline:none}
+#loading{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:28px;background:#f8f7f0}
+.intro{max-width:360px;text-align:center}.intro h1{font-weight:650;font-size:34px;margin:0 0 8px}.intro p{line-height:1.65;color:#667465;font-size:14px}
+button{border:0;border-radius:16px;padding:16px 22px;background:#65856d;color:white;font:600 17px system-ui;cursor:pointer;min-height:50px;width:100%}button:disabled{opacity:.55}
+progress{width:100%;height:10px;accent-color:#65856d;margin:18px 0}#error{color:#a34237;white-space:pre-wrap;font-size:13px;line-height:1.5}a{color:#526f59}
+</style>
+<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+
+</head>
+<body><main id="app"><canvas id="canvas" width="480" height="860" tabindex="0">WebGL 2를 지원하는 Safari에서 열어주세요.</canvas>
+<section id="loading"><div class="intro"><h1>goyanggochi</h1><p>작은 친구와 함께하는 하루<br>iPhone · 웹 테스트</p><button id="start">우리 집 열기</button><progress id="progress" value="0" max="1" hidden></progress><p id="message">Safari에서 바로 체험할 수 있어요.<br>첫 실행에는 파일을 내려받는 시간이 필요해요.</p><p>사진은 기기에서만 처리해요. 저장 데이터는 이 브라우저에 남으며, 방문 기록을 삭제하면 함께 사라질 수 있어요.</p><p id="error" role="alert"></p></div></section></main>
+<noscript>이 프로그램은 JavaScript가 필요합니다.</noscript>
+<script src="pet_bridge.js"></script>
+<script src="index.js"></script>
+<script>
+// A compressed static bundle stays below common static-host asset size limits.
+// Only this app's engine files are intercepted; camera/photos never leave the device.
+const config = {"args":[],"canvasResizePolicy":0,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":6867444,"index.wasm":37686550},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const fetchOriginal = window.fetch.bind(window);
+window.fetch = async function(input, options) {
+  const url = new URL(input instanceof Request ? input.url : input, document.baseURI);
+  const root = new URL('.', document.baseURI);
+  if (url.origin === root.origin && url.pathname.startsWith(root.pathname) && /\/index\.(wasm|pck)$/.test(url.pathname)) {
+    const compressed = new URL(url); compressed.pathname += '.gz';
+    const response = await fetchOriginal(compressed, options);
+    if (!response.ok) return response;
+    const encoding = response.headers.get('content-encoding') || '';
+    const body = encoding.includes('gzip') ? response.body : response.body.pipeThrough(new DecompressionStream('gzip'));
+    return new Response(body, {status:200, headers:{'Content-Type':url.pathname.endsWith('.wasm')?'application/wasm':'application/octet-stream'}});
+  }
+  return fetchOriginal(input, options);
+};
+const canvas = document.getElementById('canvas');
+function fitCanvas() { canvas.width = Math.round(canvas.clientWidth); canvas.height = Math.round(canvas.clientHeight); }
+fitCanvas(); window.addEventListener('resize', fitCanvas);
+config.canvas = canvas;
+config.canvasResizePolicy = 0;
+config.focusCanvas = true;
+config.onExit = function(){ window.PetAppReady=false; document.getElementById('error').textContent='앱이 종료됐어요. 페이지를 새로고침해 주세요.'; document.getElementById('loading').style.display='flex'; };
+const engine = new Engine(config);
+let failed = false;
+document.getElementById('start').addEventListener('click', async () => {
+  if (failed) return location.reload();
+  const start = document.getElementById('start'), progress = document.getElementById('progress');
+  start.disabled = true; progress.hidden = false;
+  document.getElementById('message').textContent='친구가 사는 방을 준비하고 있어요…';
+  try {
+    if (!window.DecompressionStream) throw new Error('이 웹 테스트는 iOS 16.4 이상 Safari가 필요해요. iOS를 업데이트해 주세요.');
+    const missing = Engine.getMissingFeatures({threads:false});
+    if (missing.length) throw new Error('브라우저에서 지원하지 않는 기능이 있어요: '+missing.join(', '));
+    await engine.startGame({onProgress(current,total){ if(total>0){progress.max=total;progress.value=current;} }});
+    document.getElementById('loading').style.display='none'; canvas.focus();
+    window.PetAppReady = true;
+  } catch(error) { failed=true; console.error(error); document.getElementById('error').textContent='실행하지 못했어요. Safari에서 새로고침해 주세요.\n'+error.message; start.textContent='새로고침'; start.disabled=false; }
+});
+</script></body></html>
+
