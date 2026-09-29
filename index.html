@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f8f7f0">
+<meta name="theme-color" content="#fff4dd">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>고양고치 · iPhone 웹 테스트</title>
+<title>고양고치 · 작은 친구와 함께하는 하루</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#e5eadd;color:#34483e;font-family:system-ui,-apple-system,sans-serif}
-#app{position:relative;margin:auto;width:100%;max-width:480px;height:100%;height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:#f8f7f0}
+#app{position:relative;margin:auto;width:100%;max-width:1536px;height:100%;height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:#fff4dd}
 #canvas{display:block;width:100%;height:100%;touch-action:none;outline:none}
 #loading{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:28px;background:#f8f7f0}
 .intro{max-width:360px;text-align:center}.intro h1{font-weight:650;font-size:34px;margin:0 0 8px}.intro p{line-height:1.65;color:#667465;font-size:14px}
@@ -22,13 +22,13 @@ progress{width:100%;height:10px;accent-color:#65856d;margin:18px 0}#error{color:
 <body><main id="app"><canvas id="canvas" width="480" height="860" tabindex="0">WebGL 2를 지원하는 Safari에서 열어주세요.</canvas>
 <section id="loading"><div class="intro"><h1>goyanggochi</h1><p>작은 친구와 함께하는 하루<br>iPhone · 웹 테스트</p><button id="start">우리 집 열기</button><progress id="progress" value="0" max="1" hidden></progress><p id="message">Safari에서 바로 체험할 수 있어요.<br>첫 실행에는 파일을 내려받는 시간이 필요해요.</p><p>사진은 기기에서만 처리해요. 저장 데이터는 이 브라우저에 남으며, 방문 기록을 삭제하면 함께 사라질 수 있어요.</p><p id="error" role="alert"></p></div></section></main>
 <noscript>이 프로그램은 JavaScript가 필요합니다.</noscript>
-<script src="pet_bridge.js?v=f617ac5a49af318b"></script>
-<script src="index.js?v=f617ac5a49af318b"></script>
+<script src="pet_bridge.js?v=da56d3dcaaef06f8"></script>
+<script src="index.js?v=da56d3dcaaef06f8"></script>
 <script>
 // A compressed static bundle stays below common static-host asset size limits.
 // Only this app's engine files are intercepted; camera/photos never leave the device.
-const config = {"args":[],"canvasResizePolicy":0,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":6944936,"index.wasm":37686550},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
-const buildVersion = 'f617ac5a49af318b';
+const config = {"args":[],"canvasResizePolicy":0,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":13817684,"index.wasm":37686550},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const buildVersion = 'da56d3dcaaef06f8';
 const fetchOriginal = window.fetch.bind(window);
 window.fetch = async function(input, options) {
   const url = new URL(input instanceof Request ? input.url : input, document.baseURI);
